@@ -8,7 +8,6 @@ import {
 } from './CollectionDataParser'
 import {defaultPagination} from '../constants'
 import {CollectionsData} from './types'
-import {extractCollectionsIdentifiers} from '../utils'
 
 interface FetcherPagination {
   paginationInfo?: Pagination
@@ -28,21 +27,21 @@ class CollectionPaginatedFetcher {
     this.apiClient = new ApiClient({apiEndpoint})
   }
 
-  getCollections = async (search: string) => {
+  searchCollections = async (search: string) => {
     if (this.shouldReturnNoCollections(search)) {
       return this.getNoItemsResponse()
     }
 
     this.resetPagination(search)
 
-    const data = await this.getCollectionsByNameOrId(search)
+    const data = await this.getCollectionsByIdOrName(search)
     const parsedData = new DataParser(data, this.collectionsIds).getParsedData()
 
     this.updatePagination(data)
     return parsedData
   }
 
-  private getCollectionsByNameOrId = async (search: string) => {
+  private getCollectionsByIdOrName = async (search: string) => {
     const dataByName = await this.apiClient.fetchCollections({
       search,
       endCursor: this.endCursor,
@@ -61,13 +60,11 @@ class CollectionPaginatedFetcher {
   }
 
   getCollectionsById = async (identifiers: Identifiers) => {
-    const {collectionIds} = extractCollectionsIdentifiers(identifiers)
-
     let result: Product[] = []
 
-    if (collectionIds.length > 0) {
+    if (identifiers.length > 0) {
       const collectionsData = await this.apiClient.fetchCollections({
-        collectionIds,
+        collectionIds: identifiers,
       })
       const parsedCollections = new DataParser(collectionsData).getParsedItems()
       result = [...parsedCollections]

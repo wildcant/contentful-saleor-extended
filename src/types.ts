@@ -30,4 +30,5 @@ export enum ESkuType {
   product = 'product',
   category = 'category',
   collection = 'collection',
+  variant = 'variant',
 }

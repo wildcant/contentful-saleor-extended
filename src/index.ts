@@ -2,6 +2,7 @@ import {DialogExtensionSDK, FieldExtensionSDK} from '@contentful/app-sdk'
 import {setup, renderSkuPicker} from '@contentful/ecommerce-app-base'
 import CollectionPaginatedFetcher from './collections/CollectionPaginatedFetcher'
 import {dialogConfig, DIALOG_ID, SKUPickerConfig, strings} from './constants'
+import VariantPaginatedFetcher from './product-variants/VariantPaginatedFetcher'
 
 import ProductPaginatedFetcher from './products/ProductPaginatedFetcher'
 import {getSkuPickerArgs} from './skuResolvers'
@@ -9,6 +10,11 @@ import {ClientConfig, ESkuType, Identifiers} from './types'
 
 const makeCTA = (fieldType: string, skuType: ESkuType) => {
   switch (skuType) {
+    case ESkuType.variant:
+      return fieldType === 'Array'
+        ? strings.selectVariants
+        : strings.selectVariant
+
     case ESkuType.category:
       return fieldType === 'Array'
         ? strings.selectCategories
@@ -81,14 +87,15 @@ const fetchProductPreviews = (
   config: ClientConfig,
   skuType: ESkuType,
 ) => {
+  if (skuType === ESkuType.variant) {
+    return new VariantPaginatedFetcher(config).getVariantsBySku(identifiers)
+  }
   if (skuType === ESkuType.collection) {
     return new CollectionPaginatedFetcher(config).getCollectionsById(
       identifiers,
     )
   }
-  return new ProductPaginatedFetcher(config).getProductsAndVariantsByIdOrSKU(
-    identifiers,
-  )
+  return new ProductPaginatedFetcher(config).getProductsById(identifiers)
 }
 
 const config = {

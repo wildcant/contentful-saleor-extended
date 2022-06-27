@@ -22,6 +22,8 @@ export const strings = {
   selectCategory: 'Select a category',
   selectCollections: 'Select collections',
   selectCollection: 'Select a collection',
+  selectVariants: 'Select variants',
+  selectVariant: 'Select a variant',
   errors: {
     missingApiEndpoint: 'Missing Api Edpoint URL',
   },
@@ -32,15 +34,19 @@ export const SKU_TYPES = [
     id: ESkuType.product,
     name: 'Product',
   },
-  // TODO.
-  // {
-  //   id: ESkuType.category,
-  //   name: 'Cateogory',
-  // },
+  {
+    id: ESkuType.variant,
+    name: 'Product variant',
+  },
   {
     id: ESkuType.collection,
     name: 'Collection',
   },
+  // TODO.
+  // {
+  //   id: ESkuType.category,
+  //   name: 'Category',
+  // },
 ]
 
 export const SKUPickerConfig = {

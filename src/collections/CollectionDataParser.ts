@@ -66,7 +66,8 @@ class CollectionDataParser {
       id,
       name,
       image: backgroundImage?.url || '',
-      sku: CollectionDataParser.getDisplayLabel(id),
+      displaySKU: CollectionDataParser.getDisplayLabel(id),
+      sku: id,
     }
   }
 }

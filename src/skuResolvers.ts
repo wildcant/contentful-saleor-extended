@@ -2,39 +2,37 @@ import {DialogExtensionSDK} from '@contentful/app-sdk'
 import ProductPaginatedFetcher from './products/ProductPaginatedFetcher'
 import CollectionPaginatedFetcher from './collections/CollectionPaginatedFetcher'
 import {ClientConfig, ESkuType} from './types'
-
-export const makeProductSearchResolver = async (sdk: DialogExtensionSDK) => {
-  const fetcher = new ProductPaginatedFetcher(
-    sdk.parameters.installation as ClientConfig,
-  )
-  return fetcher.getVariantsWithProducts
-}
-
-export const makeCollectionSearchResolver = async (sdk: DialogExtensionSDK) => {
-  const fetcher = new CollectionPaginatedFetcher(
-    sdk.parameters.installation as ClientConfig,
-  )
-  return fetcher.getCollections
-}
+import VariantPaginatedFetcher from './product-variants/VariantPaginatedFetcher'
 
 export const getSkuPickerArgs = async (
   sdk: DialogExtensionSDK,
   skuType: ESkuType,
 ) => {
+  if (skuType === ESkuType.variant) {
+    const fetcher = new VariantPaginatedFetcher(
+      sdk.parameters.installation as ClientConfig,
+    )
+    return {
+      fetchProductPreviews: fetcher.getVariantsBySku,
+      fetchProducts: fetcher.searchVariants,
+    }
+  }
+
   if (skuType === ESkuType.collection) {
     const fetcher = new CollectionPaginatedFetcher(
       sdk.parameters.installation as ClientConfig,
     )
     return {
       fetchProductPreviews: fetcher.getCollectionsById,
-      fetchProducts: fetcher.getCollections,
+      fetchProducts: fetcher.searchCollections,
     }
   }
+
   const fetcher = new ProductPaginatedFetcher(
     sdk.parameters.installation as ClientConfig,
   )
   return {
-    fetchProductPreviews: fetcher.getProductsAndVariantsByIdOrSKU,
-    fetchProducts: fetcher.getVariantsWithProducts,
+    fetchProductPreviews: fetcher.getProductsById,
+    fetchProducts: fetcher.searchProducts,
   }
 }

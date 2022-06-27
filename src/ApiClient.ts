@@ -5,9 +5,10 @@ import {
   fetchProductsQuery,
   fetchProductVariantsQuery,
 } from './queries'
-import {ProductsData, ProductVariantsData} from './products/types'
+import {ProductsData} from './products/types'
 import {ClientConfig, Identifiers} from './types'
 import {CollectionsData} from './collections/types'
+import {VariantsData} from './product-variants/types'
 
 type FetchVariantsParams = {
   search?: string
@@ -16,7 +17,9 @@ type FetchVariantsParams = {
 }
 
 type FetchProductsParams = {
+  search?: string
   productIds?: Identifiers
+  endCursor?: string
 }
 
 type FetchCollectionsParams = {
@@ -36,7 +39,7 @@ class ApiClient {
     search,
     skus,
     endCursor,
-  }: FetchVariantsParams): Promise<ProductVariantsData> => {
+  }: FetchVariantsParams): Promise<VariantsData> => {
     const res = await this.fetch(
       fetchProductVariantsQuery(search, skus, endCursor),
     )
@@ -49,9 +52,13 @@ class ApiClient {
   }
 
   fetchProducts = async ({
+    search,
     productIds,
+    endCursor,
   }: FetchProductsParams): Promise<ProductsData> => {
-    const res = await this.fetch(fetchProductsQuery(productIds))
+    const res = await this.fetch(
+      fetchProductsQuery(search, productIds, endCursor),
+    )
 
     const {
       data: {products},

@@ -1,22 +1,17 @@
 import {Pagination, Product} from '@contentful/ecommerce-app-base'
 import {ApiResponseCommonData, Image} from '../types'
 
-export type ApiCollectionEdge = {
-  node: {
-    id: string
-    name: string
-    backgroundImage: Image
-  }
-}
-
 export type ApiCollection = {
   id: string
   name: string
   backgroundImage: Image
 }
 
-export type CollectionCountableEdge = {
+export type ApiCollectionEdge = {
   node: ApiCollection
+}
+
+export type CollectionCountableEdge = ApiCollectionEdge & {
   cursor: string
 }
 

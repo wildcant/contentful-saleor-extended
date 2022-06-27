@@ -1,53 +1,56 @@
 import {Pagination, Product} from '@contentful/ecommerce-app-base'
 import {uniq} from 'lodash'
-import ApiClient from '../ApiClient'
-import {defaultPagination} from '../constants'
 import {ClientConfig, Identifiers} from '../types'
-import DataParser from './ProductDataParser'
-import {ProductsData} from './types'
+import ApiClient from '../ApiClient'
+import {
+  default as VariantDataParser,
+  default as DataParser,
+} from './VariantDataParser'
+import {defaultPagination} from '../constants'
+import {VariantsData} from './types'
 
 interface FetcherPagination {
   paginationInfo?: Pagination
   endCursor?: string
-  productIds?: Identifiers
+  variantSkus?: Identifiers
 }
 
-class ProductPaginatedFetcher {
+class VariantPaginatedFetcher {
   apiClient: ApiClient
   endCursor: string = ''
   previousCursor: string = ''
   lastSearch?: string
-  productsIds: string[] = []
+  variantsIds: string[] = []
   lastPaginationInfo: Pagination = defaultPagination
 
   constructor({apiEndpoint}: ClientConfig) {
     this.apiClient = new ApiClient({apiEndpoint})
   }
 
-  searchProducts = async (search: string) => {
-    if (this.shouldReturnNoProducts(search)) {
+  searchVariants = async (search: string) => {
+    if (this.shouldReturnNoVariants(search)) {
       return this.getNoItemsResponse()
     }
 
     this.resetPagination(search)
 
-    const data = await this.getProductsByIdOrName(search)
-    const parsedData = new DataParser(data, this.productsIds).getParsedData()
+    const data = await this.getVariantsBySkuOrName(search)
+    const parsedData = new DataParser(data, this.variantsIds).getParsedData()
 
     this.updatePagination(data)
     return parsedData
   }
 
-  private getProductsByIdOrName = async (search: string) => {
-    const dataByName = await this.apiClient.fetchProducts({
+  private getVariantsBySkuOrName = async (search: string) => {
+    const dataByName = await this.apiClient.fetchVariants({
       search,
       endCursor: this.endCursor,
     })
 
     if (dataByName.totalCount === 0) {
-      const idsOfSearch = search.split(' ')
-      const dataByIds = await this.apiClient.fetchProducts({
-        productIds: idsOfSearch,
+      const skusOfSearch = search.split(' ')
+      const dataByIds = await this.apiClient.fetchVariants({
+        skus: skusOfSearch,
         endCursor: this.endCursor,
       })
       return dataByIds
@@ -56,22 +59,22 @@ class ProductPaginatedFetcher {
     return dataByName
   }
 
-  getProductsById = async (identifiers: Identifiers) => {
+  getVariantsBySku = async (identifiers: Identifiers) => {
     let result: Product[] = []
 
     if (identifiers.length > 0) {
-      const productsData = await this.apiClient.fetchProducts({
-        productIds: identifiers,
+      const variantsData = await this.apiClient.fetchVariants({
+        skus: identifiers,
       })
-      const parsedProducts = new DataParser(productsData).getParsedItems()
-      result = [...parsedProducts]
+      const parsedVariants = new DataParser(variantsData).getParsedItems()
+      result = [...parsedVariants]
     }
 
     return result
   }
 
   // hack for avoiding doubled requests when using sku app search field
-  private shouldReturnNoProducts = (search?: string) =>
+  private shouldReturnNoVariants = (search?: string) =>
     search === this.lastSearch && !this.endCursor && this.previousCursor
 
   private getNoItemsResponse = () => ({
@@ -88,15 +91,15 @@ class ProductPaginatedFetcher {
     this.setPagination()
   }
 
-  private updatePagination = (data: ProductsData) => {
-    const dataParser = new DataParser(data)
+  private updatePagination = (data: VariantsData) => {
+    const dataParser = new VariantDataParser(data)
 
     this.setPagination({
       paginationInfo: dataParser.getParsedData().pagination,
       endCursor: data.pageInfo.endCursor,
-      productIds: uniq([
-        ...this.productsIds,
-        ...dataParser.getProductsIds(),
+      variantSkus: uniq([
+        ...this.variantsIds,
+        ...dataParser.getVariantsIds(),
       ]) as Identifiers,
     })
   }
@@ -109,18 +112,18 @@ class ProductPaginatedFetcher {
     {
       paginationInfo = defaultPagination,
       endCursor = '',
-      productIds = [],
+      variantSkus = [],
     }: FetcherPagination = {
       paginationInfo: defaultPagination,
       endCursor: '',
-      productIds: [],
+      variantSkus: [],
     },
   ) => {
     this.previousCursor = this.endCursor
     this.endCursor = endCursor
     this.lastPaginationInfo = paginationInfo
-    this.productsIds = productIds
+    this.variantsIds = variantSkus
   }
 }
 
-export default ProductPaginatedFetcher
+export default VariantPaginatedFetcher
