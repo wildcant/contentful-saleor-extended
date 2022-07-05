@@ -3,13 +3,14 @@ import {Identifiers} from './types'
 import {ITEMS_OFFSET} from './constants'
 import {getFormattedIdentifiers} from './utils'
 
+// TODO: Figure out multi channel/multi locale queries.
 export const fetchProductsQuery = (
   search: string = '',
   ids?: string[],
   lastCursor: string = '',
 ) => gql`
   {
-    products(first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: {search: "${search}", ids: ${getFormattedIdentifiers(
+    products(channel: "default-channel", first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: {search: "${search}", ids: ${getFormattedIdentifiers(
   ids,
 )} }) {
       totalCount
@@ -38,7 +39,7 @@ export const fetchProductVariantsQuery = (
   lastCursor: string = '',
 ) => gql`
   {
-    productVariants(first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: { search: "${search}", sku: ${getFormattedIdentifiers(
+    productVariants(channel: "default-channel", first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: { search: "${search}", sku: ${getFormattedIdentifiers(
   skus,
 )} } ) {
       totalCount
@@ -75,7 +76,7 @@ export const fetchCollectionsQuery = (
   lastCursor: string = '',
 ) => gql`
   {
-    collections(first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: {search: "${search}", ids: ${getFormattedIdentifiers(
+    collections(channel: "default-channel", first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: {search: "${search}", ids: ${getFormattedIdentifiers(
   ids,
 )} }) {
     totalCount
